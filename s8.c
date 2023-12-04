@@ -12,11 +12,21 @@ function b32 s8equals(s8 first, s8 second) {
   return 1;
 };
 
-int main() {
-  s8 first = s8("hello");
-  s8 second = s8("hello");
-  printf("is equal: %d", s8equals(first, second));
-}
+function void s8copy(u8 *dst, byte *src, size sz) {
+  u8 *originalDest = dst;
+  while (sz > 0 && *src != '\0') {
+    *dst = *src;
+    dst++;
+    src++;
+    sz--;
+  }
+  while (sz > 0) {
+    *dst = '\0';
+    dst++;
+    sz--;
+  }
+};
+
 // function s8 s8clone(u8 *src, u8 *dst){
 //
 // };
@@ -24,3 +34,23 @@ int main() {
 // function s8 s8prefix(s8 src, s8 dst){
 //
 // };
+
+// returns the character from the string at poition pos
+function byte_parsed s8at(s8 src, u32 pos) {
+  byte_parsed out = (byte_parsed){.data = ' ', .ok = 0};
+  if (src.len < pos || pos < 0) {
+    return out;
+  }
+  out.data = src.data[pos];
+  out.ok = 1;
+  return out;
+};
+
+// int main() {
+//   s8 first = s8("hello");
+//   s8 second = s8("hello");
+//   printf("is equal: %d", s8equals(first, second));
+//   byte_parsed ch = s8at(first, 9);
+//   if (ch.ok)
+//     printf("ch at 3 = %s", &ch.data);
+// }

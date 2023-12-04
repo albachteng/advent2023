@@ -4,9 +4,9 @@
 #define countof(a) (sizeof(a) / sizeof(*(a)))
 #define lengthof(s) (countof(s) - 1)
 
-#define assert(c)                                                              \
-  while (!(c))                                                                 \
-  __builtin_unreachable()
+// #define assert(c)                                                              \
+//   while (!(c))                                                                 \
+//   __builtin_unreachable()
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
