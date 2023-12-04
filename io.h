@@ -6,10 +6,6 @@
 
 typedef struct {
   FILE *file;
-  byte *line_buffer;
-  size line_buffer_size;
+  s8 line_buffer;
   s8 current_line;
-} LineReader;
-
-function FILE *open(const char *);
-s8_parsed nextline(FILE *file);
+} line_reader;

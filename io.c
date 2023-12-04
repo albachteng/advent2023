@@ -13,8 +13,8 @@ function FILE *open(const byte *name) {
   return file;
 };
 
-LineReader *createLineReader(const char *filename, size_t line_buffer_size) {
-  LineReader *reader = malloc(sizeof(LineReader));
+line_reader *new_line_reader(const char *filename, size_t line_buffer_size) {
+  line_reader *reader = malloc(sizeof(line_reader));
   if (reader == NULL) {
     perror("Error creating LineReader");
     exit(EXIT_FAILURE);
@@ -26,39 +26,32 @@ LineReader *createLineReader(const char *filename, size_t line_buffer_size) {
     exit(EXIT_FAILURE);
   }
 
-  reader->line_buffer = malloc(line_buffer_size);
-  if (reader->line_buffer == NULL) {
+  reader->line_buffer =
+      (s8){.data = malloc(line_buffer_size), .len = line_buffer_size};
+  if (reader->line_buffer.data == NULL) {
     perror("Error creating line buffer");
     exit(EXIT_FAILURE);
   }
 
-  reader->line_buffer_size = line_buffer_size;
-  reader->current_line.data = NULL;
-  reader->current_line.len = 0;
+  reader->line_buffer.len = line_buffer_size;
+  reader->current_line = (s8){0};
 
   return reader;
 }
 
-void destroyLineReader(LineReader *reader) {
-  free(reader->line_buffer);
-  free(reader->current_line.data);
-  fclose(reader->file);
-  free(reader);
-}
-
 // TODO change to s8_parsed
-s8 readNextLine(LineReader *reader) {
+s8_parsed next_line(line_reader *reader) {
   size bytesRead;
 
   // Read a line into the buffer
-  if (fgets(reader->line_buffer, (i32)reader->line_buffer_size, reader->file) ==
-      NULL) {
+  if (fgets((byte *)reader->line_buffer.data, (i32)reader->line_buffer.len,
+            reader->file) == NULL) {
     // End of file
     printf("EOF");
-    return (s8){NULL, 0};
+    return (s8_parsed){0};
   }
 
-  bytesRead = strlen(reader->line_buffer);
+  bytesRead = reader->line_buffer.len;
 
   // Allocate or reallocate memory for the line
   reader->current_line.data = realloc(reader->current_line.data, bytesRead);
@@ -68,8 +61,19 @@ s8 readNextLine(LineReader *reader) {
   }
 
   // Copy the line from the buffer to the allocated memory
-  s8copy(reader->current_line.data, reader->line_buffer, bytesRead); // TODO
+  s8copy(reader->current_line.data, (byte *)reader->line_buffer.data,
+         bytesRead); // TODO
   reader->current_line.len = bytesRead;
+  s8_parsed out = {0};
+  out.str = reader->current_line;
+  out.ok = 1;
+  return out;
+}
 
-  return reader->current_line;
+void destroy_line_reader(line_reader *reader) {
+  free(reader->line_buffer.data);
+  reader->line_buffer.len = 0;
+  free(reader->current_line.data);
+  fclose(reader->file);
+  free(reader);
 }

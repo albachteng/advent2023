@@ -27,10 +27,6 @@ function void s8copy(u8 *dst, byte *src, size sz) {
   }
 };
 
-// function s8 s8clone(u8 *src, u8 *dst){
-//
-// };
-
 // function s8 s8prefix(s8 src, s8 dst){
 //
 // };
@@ -45,12 +41,3 @@ function byte_parsed s8at(s8 src, u32 pos) {
   out.ok = 1;
   return out;
 };
-
-// int main() {
-//   s8 first = s8("hello");
-//   s8 second = s8("hello");
-//   printf("is equal: %d", s8equals(first, second));
-//   byte_parsed ch = s8at(first, 9);
-//   if (ch.ok)
-//     printf("ch at 3 = %s", &ch.data);
-// }
