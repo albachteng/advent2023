@@ -1,6 +1,7 @@
 #include "arena.h"
 #include "base.h"
 #include "base_types.h"
+#include <assert.h>
 
 void *alloc(arena *a, size length, size align, size count) {
   size avail = a->end - a->beg;

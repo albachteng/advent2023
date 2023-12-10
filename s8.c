@@ -1,5 +1,14 @@
 #include "s8.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+function void s8_print(s8 str) {
+  for (size i = 0; i < str.len; i++) {
+    putchar(str.data[i]);
+  }
+  putchar('\n');
+}
 
 function b32 s8equals(s8 first, s8 second) {
   if (first.len != second.len) {
@@ -12,24 +21,54 @@ function b32 s8equals(s8 first, s8 second) {
   return 1;
 };
 
-function void s8copy(u8 *dst, byte *src, size sz) {
-  u8 *originalDest = dst;
-  while (sz > 0 && *src != '\0') {
-    *dst = *src;
-    dst++;
-    src++;
-    sz--;
+function s8 s8copy(s8 src) {
+  s8 dst;
+  dst.data = (byte *)malloc(src.len + 1);
+  if (dst.data == NULL) {
+    printf("error in malloc for s8copy");
+    exit(1);
   }
-  while (sz > 0) {
-    *dst = '\0';
-    dst++;
-    sz--;
-  }
+  strncpy(dst.data, src.data, src.len);
+  dst.data[src.len] = '\0';
+  dst.len = src.len;
+  s8_print(dst);
+  return dst;
 };
 
-// function s8 s8prefix(s8 src, s8 dst){
+// function s8 s8prefix(s8 src, byte ch){
 //
 // };
+
+function s8 s8postfix(s8 src, byte ch) {
+  s8 result;
+  result.data = (byte *)malloc(
+      src.len + 2); // +2 for the new character and null terminator
+  if (result.data == NULL) {
+    fprintf(stderr, "Memory allocation failed.\n");
+    exit(EXIT_FAILURE);
+  }
+  strncpy(result.data, src.data, src.len);
+  result.data[src.len] = ch;
+  result.data[src.len + 1] = '\0';
+  result.len = src.len + 1;
+  return result;
+};
+
+int main() {
+  s8 src = s8("hi");
+  printf("%s\n", src.data);
+  s8_print(src);
+  byte ch = '!';
+  s8 cpy = s8copy(src);
+  s8_print(cpy);
+  printf("%s\n", cpy.data);
+  printf("len = %td\n", cpy.len);
+  s8 new = s8postfix(src, ch);
+  s8_print(cpy);
+  printf("len = %td\n", cpy.len);
+  s8_print(new);
+  printf("len = %td\n", new.len);
+}
 
 // returns the character from the string at poition pos
 function byte_parsed s8at(s8 src, u32 pos) {

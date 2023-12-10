@@ -5,6 +5,10 @@
 
 b32 char_is_num(byte);
 u32 make_two_digit(byte_parsed, byte_parsed);
+function byte_parsed str_to_byte(s8 str);
+
+global byte *lookup[] = {"zero", "one", "two",   "three", "four",
+                         "five", "six", "seven", "eight", "nine"};
 
 i32 main() {
   u32 total = 0;
@@ -14,14 +18,32 @@ i32 main() {
   while (line.ok) {
     byte_parsed first_digit = (byte_parsed){0};
     byte_parsed second_digit = (byte_parsed){0};
-
+    s8 buf = (s8){0};
     for (size i = 0; i < line.str.len; i++) {
       byte_parsed ch = s8at(line.str, i);
-      if (ch.ok && char_is_num(ch.data)) {
-        if (!first_digit.ok) {
-          first_digit = ch;
+      if (ch.ok) {
+        // char was num
+        if (char_is_num(ch.data)) {
+          // reset buffer
+          buf = (s8){0};
+          if (!first_digit.ok) {
+            first_digit = ch;
+          } else {
+            second_digit = ch;
+          }
         } else {
-          second_digit = ch;
+          // char was not num, add next char and check against lookup table
+          buf = s8postfix(buf, ch.data);
+          byte_parsed strch = str_to_byte(buf);
+          if (strch.ok) {
+            // reset buf
+            buf = (s8){0};
+            if (!first_digit.ok) {
+              first_digit = strch;
+            } else {
+              second_digit = strch;
+            }
+          }
         }
       }
     }
@@ -50,4 +72,16 @@ u32 make_two_digit(byte_parsed first, byte_parsed second) {
     ones = tens;
   }
   return (tens * 10) + ones;
+}
+
+function byte_parsed str_to_byte(s8 str) {
+  // printf("str was: %s\n", str.data);
+  for (size i = 0; i < countof(lookup); i++) {
+    if (s8equals(str, s8(lookup[i]))) {
+      byte ch = i + '0';
+      // printf("byte was: %hhd\n", ch);
+      return (byte_parsed){.data = ch, .ok = 1};
+    }
+  }
+  return (byte_parsed){0};
 }

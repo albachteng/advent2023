@@ -39,21 +39,14 @@ line_reader *new_line_reader(const char *filename, size_t line_buffer_size) {
   return reader;
 }
 
-// TODO change to s8_parsed
 s8_parsed next_line(line_reader *reader) {
-  size bytesRead;
-
-  // Read a line into the buffer
   if (fgets((byte *)reader->line_buffer.data, (i32)reader->line_buffer.len,
             reader->file) == NULL) {
-    // End of file
-    printf("EOF");
-    return (s8_parsed){0};
+    return (s8_parsed){.str = s8("EOF"), .ok = 0};
   }
 
-  bytesRead = reader->line_buffer.len;
+  size bytesRead = reader->line_buffer.len;
 
-  // Allocate or reallocate memory for the line
   reader->current_line.data = realloc(reader->current_line.data, bytesRead);
   if (reader->current_line.data == NULL) {
     perror("Error allocating memory for line");
