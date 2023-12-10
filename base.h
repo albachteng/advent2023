@@ -1,6 +1,7 @@
-#define sizeof(x) (size)sizeof(x)
+#include <stddef.h>
+#define sizeof(x) (ptrdiff_t)sizeof(x)
 
-#define alignof(x) (size) _Alignof(x)
+#define alignof(x) (ptrdiff_t) _Alignof(x)
 #define countof(a) (sizeof(a) / sizeof(*(a)))
 #define lengthof(s) (countof(s) - 1)
 

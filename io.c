@@ -1,10 +1,11 @@
 #include "io.h"
 #include <assert.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-function FILE *open(const byte *name) {
+function FILE *open(const char *name) {
   FILE *file = fopen(name, "r");
   if (file == NULL) {
     assert(0);
@@ -40,12 +41,12 @@ line_reader *new_line_reader(const char *filename, size_t line_buffer_size) {
 }
 
 s8_parsed next_line(line_reader *reader) {
-  if (fgets((byte *)reader->line_buffer.data, (i32)reader->line_buffer.len,
+  if (fgets((char *)reader->line_buffer.data, (int)reader->line_buffer.len,
             reader->file) == NULL) {
     return (s8_parsed){.str = s8("EOF"), .ok = 0};
   }
 
-  size bytesRead = reader->line_buffer.len;
+  ptrdiff_t bytesRead = reader->line_buffer.len;
 
   reader->current_line.data = realloc(reader->current_line.data, bytesRead);
   if (reader->current_line.data == NULL) {
@@ -54,8 +55,8 @@ s8_parsed next_line(line_reader *reader) {
   }
 
   // Copy the line from the buffer to the allocated memory
-  s8copy(reader->current_line.data, (byte *)reader->line_buffer.data,
-         bytesRead); // TODO
+  strncpy(reader->current_line.data, (char *)reader->line_buffer.data,
+          bytesRead); // TODO
   reader->current_line.len = bytesRead;
   s8_parsed out = {0};
   out.str = reader->current_line;

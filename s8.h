@@ -1,19 +1,31 @@
 #include "base.h"
-#include "base_types.h"
+#include <stddef.h>
 
 // wraps a c string literal and makes an s8 out of it
 #define s8(s)                                                                  \
-  (s8) { (byte *)s, lengthof(s) }
+  (s8) { (char *)s, lengthof(s) }
+
+typedef int b32;
 
 typedef struct {
-  byte *data;
-  size len;
+  char *data;
+  ptrdiff_t len;
 } s8; // UTF-8 strings
 
+typedef struct s8node {
+  struct s8node *next;
+  s8 val;
+} s8node;
+
 typedef struct {
-  byte data;
+  s8node *head;
+  s8node *tail;
+} s8list;
+
+typedef struct {
+  char data;
   b32 ok;
-} byte_parsed;
+} char_parsed;
 
 typedef struct {
   s8 str;
