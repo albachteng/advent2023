@@ -36,6 +36,38 @@ function s8 s8clone(s8 src) {
   return dst;
 };
 
+function s8 s8postfix(s8 src, char ch) {
+  s8 result;
+  result.data = (char *)malloc(
+      src.len + 2); // +2 for the new character and null terminator
+  if (result.data == NULL) {
+    fprintf(stderr, "Memory allocation failed.\n");
+    exit(EXIT_FAILURE);
+  }
+  strncpy(result.data, src.data, src.len);
+  result.data[src.len] = ch;
+  result.data[src.len + 1] = '\0';
+  result.len = src.len + 1;
+  return result;
+};
+
+function s8 s8slice(s8 src, ptrdiff_t beg, ptrdiff_t end) {
+  s8 out;
+  if (beg >= src.len || beg > end) {
+    return out; // TODO
+  }
+  ptrdiff_t len = (end > beg) ? (end - beg) : 0;
+  printf("len = %td\n", len);
+  out.data = (char *)malloc(len + 1);
+  if (out.data == NULL) {
+    exit(1); // TODO
+  }
+  strncpy(out.data, src.data + beg, len);
+  out.data[len] = '\0';
+  out.len = len;
+  return out;
+}
+
 // function s8 s8prefix(s8 src, char ch){
 //
 // };
@@ -49,7 +81,7 @@ function s8list s8list_init() {
   return lst;
 };
 
-// in-place
+// add string to list in-place
 function void s8list_append(s8list *list, s8 str) {
   s8node *node = new (&list->arena, s8node, 1);
   node->val = str;
@@ -94,43 +126,40 @@ function s8list s8list_slice(s8list *list, ptrdiff_t start, ptrdiff_t end) {
   ptrdiff_t idx = 0;
   s8node *curr = list->head;
   while (idx < start && curr != NULL) {
-    // printf("index: %td\n", idx);
     idx++;
-    // s8print(curr->val);
     curr = curr->next;
   }
   while (idx < end && curr != NULL) {
-    // printf("index: %td\n", idx);
     idx++;
     s8list_append(&out, curr->val);
-    // s8print(curr->val);
     curr = curr->next;
   }
-  // printf("about to return: \n");
-  // s8list_print(&out);
   return out;
 }
 
+function s8 s8list_to_s8(s8list *list) {
+  s8 out;
+  char buffer[1024];
+  ptrdiff_t pos = 0;
+  s8node *curr = list->head;
+  while (curr != NULL) {
+    for (ptrdiff_t i = 0; i < curr->val.len; i++) {
+      buffer[pos++] = curr->val.data[i];
+    }
+    curr = curr->next;
+  }
+  buffer[pos] = '\0';
+  out.data = buffer;
+  out.len = pos;
+  return out;
+};
+
+// necessary?
 function void s8list_free(s8list *list) {
   list->head = NULL;
   list->tail = NULL;
-  list->arena = (arena){0};
+  list->arena.beg = 0; // TODO
 }
-
-function s8 s8postfix(s8 src, char ch) {
-  s8 result;
-  result.data = (char *)malloc(
-      src.len + 2); // +2 for the new character and null terminator
-  if (result.data == NULL) {
-    fprintf(stderr, "Memory allocation failed.\n");
-    exit(EXIT_FAILURE);
-  }
-  strncpy(result.data, src.data, src.len);
-  result.data[src.len] = ch;
-  result.data[src.len + 1] = '\0';
-  result.len = src.len + 1;
-  return result;
-};
 
 int main() {
   // s8 src = s8("hi");
@@ -146,13 +175,18 @@ int main() {
   // printf("len = %td\n", cpy.len);
   // s8print(new);
   // printf("len = %td\n", new.len);
-  s8list list = s8list_init();
-  s8list_append(&list, s8("hello"));
-  s8list_append(&list, s8(" "));
-  s8list_append(&list, s8("world"));
-  s8list_print(&list);
-  s8list new_list = s8list_slice(&list, 0, 1);
-  s8list_print(&new_list);
+  // s8list list = s8list_init();
+  // s8list_append(&list, s8("hello"));
+  // s8list_append(&list, s8(" "));
+  // s8list_append(&list, s8("world"));
+  // s8list_print(&list);
+  s8 str = s8("hello world");
+  // s8print(str);
+  // printf("\n%td\n", str.len);
+  s8 out = s8slice(str, 5, 9);
+  s8print(out);
+  // s8list new_list = s8list_slice(&list, 0, 1);
+  // s8list_print(&new_list);
 }
 
 // returns the character from the string at poition pos
