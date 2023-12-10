@@ -1,4 +1,4 @@
-#include "base_types.h"
+#include <stddef.h>
 #include <string.h>
 
 #define new(a, t, n) (t *)alloc(a, sizeof(t), _Alignof(t), n)
@@ -8,4 +8,5 @@ typedef struct {
   char *end;
 } arena;
 
-void *alloc(arena *a, size length, size align, size count);
+void *alloc(arena *a, ptrdiff_t length, ptrdiff_t align, ptrdiff_t count);
+arena arena_init(char *start, ptrdiff_t size);

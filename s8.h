@@ -1,3 +1,4 @@
+#include "arena.h"
 #include "base.h"
 #include <stddef.h>
 
@@ -20,6 +21,7 @@ typedef struct s8node {
 typedef struct {
   s8node *head;
   s8node *tail;
+  arena arena;
 } s8list;
 
 typedef struct {
