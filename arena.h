@@ -9,4 +9,4 @@ typedef struct {
 } arena;
 
 void *alloc(arena *a, ptrdiff_t length, ptrdiff_t align, ptrdiff_t count);
-arena arena_init(char *start, ptrdiff_t size);
+arena init_arena();

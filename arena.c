@@ -2,11 +2,14 @@
 #include "base.h"
 #include <assert.h>
 #include <stddef.h>
+#include <stdlib.h>
 
-arena arena_init(char *start, ptrdiff_t size) {
+#define ARENA_SIZE 1024
+
+arena init_arena() {
   arena ar;
-  ar.beg = start;
-  ar.end = start + size;
+  ar.beg = (char *)malloc(ARENA_SIZE);
+  ar.end = ar.beg + ARENA_SIZE;
   return ar;
 };
 

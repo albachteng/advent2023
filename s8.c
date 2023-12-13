@@ -37,18 +37,18 @@ function s8 s8clone(s8 src) {
 };
 
 function s8 s8postfix(s8 src, char ch) {
-  s8 result;
-  result.data = (char *)malloc(
-      src.len + 2); // +2 for the new character and null terminator
-  if (result.data == NULL) {
+  s8 our;
+  our.data = (char *)malloc(src.len +
+                            2); // +2 for the new character and null terminator
+  if (our.data == NULL) {
     fprintf(stderr, "Memory allocation failed.\n");
     exit(EXIT_FAILURE);
   }
-  strncpy(result.data, src.data, src.len);
-  result.data[src.len] = ch;
-  result.data[src.len + 1] = '\0';
-  result.len = src.len + 1;
-  return result;
+  strncpy(our.data, src.data, src.len);
+  our.data[src.len] = ch;
+  our.data[src.len + 1] = '\0';
+  our.len = src.len + 1;
+  return our;
 };
 
 function s8 s8slice(s8 src, ptrdiff_t beg, ptrdiff_t end) {
@@ -56,7 +56,7 @@ function s8 s8slice(s8 src, ptrdiff_t beg, ptrdiff_t end) {
   if (beg >= src.len || beg > end) {
     return out; // TODO
   }
-  ptrdiff_t len = (end > beg) ? (end - beg) : 0;
+  ptrdiff_t len = (end > beg) ? (end - beg) : 0; // TODO silent failures here...
   printf("len = %td\n", len);
   out.data = (char *)malloc(len + 1);
   if (out.data == NULL) {
@@ -74,8 +74,7 @@ function s8 s8slice(s8 src, ptrdiff_t beg, ptrdiff_t end) {
 
 function s8list s8list_init() {
   s8list lst;
-  char *memory = malloc(ARENA_SIZE);
-  lst.arena = arena_init(memory, ARENA_SIZE);
+  lst.arena = init_arena();
   lst.head = NULL;
   lst.tail = NULL;
   return lst;
@@ -161,34 +160,12 @@ function void s8list_free(s8list *list) {
   list->arena.beg = 0; // TODO
 }
 
-int main() {
-  // s8 src = s8("hi");
-  // printf("%s\n", src.data);
-  // s8print(src);
-  // char ch = '!';
-  // s8 cpy = s8clone(src);
-  // s8print(cpy);
-  // printf("%s\n", cpy.data);
-  // printf("len = %td\n", cpy.len);
-  // s8 new = s8postfix(src, ch);
-  // s8print(cpy);
-  // printf("len = %td\n", cpy.len);
-  // s8print(new);
-  // printf("len = %td\n", new.len);
-  // s8list list = s8list_init();
-  // s8list_append(&list, s8("hello"));
-  // s8list_append(&list, s8(" "));
-  // s8list_append(&list, s8("world"));
-  // s8list_print(&list);
-  s8 str = s8("hello world");
-  // s8print(str);
-  // printf("\n%td\n", str.len);
-  s8 out = s8slice(str, 5, 9);
-  s8print(out);
-  // s8list new_list = s8list_slice(&list, 0, 1);
-  // s8list_print(&new_list);
-}
-
+// int main() {
+//   s8 str = s8("hello world");
+//   s8 out = s8slice(str, 5, 9);
+//   s8print(out);
+// }
+//
 // returns the character from the string at poition pos
 function char_parsed s8at(s8 src, int pos) {
   char_parsed out = (char_parsed){.data = ' ', .ok = 0};
