@@ -46,7 +46,7 @@ s8_parsed next_line(line_reader *reader) {
     return (s8_parsed){.str = s8("EOF"), .ok = 0};
   }
 
-  ptrdiff_t bytesRead = reader->line_buffer.len;
+  ptrdiff_t bytesRead = strlen(reader->line_buffer.data);
 
   reader->current_line.data = realloc(reader->current_line.data, bytesRead);
   if (reader->current_line.data == NULL) {

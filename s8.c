@@ -72,18 +72,34 @@ function s8 s8slice(s8 src, ptrdiff_t beg, ptrdiff_t end) {
 //
 // };
 
-function s8list s8list_init() {
-  s8list lst;
-  lst.arena = init_arena();
-  lst.head = NULL;
-  lst.tail = NULL;
+function s8list *s8list_init() {
+  arena ar = init_arena();
+  s8list *lst = new (&ar, s8list, 1);
+  lst->arena = ar;
+  lst->head = NULL;
+  lst->tail = NULL;
   return lst;
 };
 
+function s8list *s8list_reset(s8list *lst) {
+  lst->arena.end = lst->arena.beg;
+  lst->head = NULL;
+  lst->tail = NULL;
+  return lst;
+}
+
+function s8 *s8_from_char(char *ch) {
+  s8 *str = (s8 *)malloc(sizeof(s8));
+  str->data[0] = *ch;
+  str->data[1] = '\0';
+  str->len = 1;
+  return str;
+}
+
 // add string to list in-place
-function void s8list_append(s8list *list, s8 str) {
+function void s8list_append(s8list *list, s8 *str) {
   s8node *node = new (&list->arena, s8node, 1);
-  node->val = str;
+  node->val = s8clone(*str);
   node->next = NULL;
   // printf("printing node in append");
   // s8print(node->val);
@@ -97,16 +113,16 @@ function void s8list_append(s8list *list, s8 str) {
 }
 
 // new list
-function s8list s8list_merge(s8list *first, s8list *second) {
-  s8list out = s8list_init();
+function s8list *s8list_merge(s8list *first, s8list *second) {
+  s8list *out = s8list_init();
   s8node *curr = first->head;
   while (curr != NULL) {
-    s8list_append(&out, curr->val);
+    s8list_append(out, &curr->val);
     curr = curr->next;
   }
   curr = second->head;
   while (curr != NULL) {
-    s8list_append(&out, curr->val);
+    s8list_append(out, &curr->val);
     curr = curr->next;
   }
   return out;
@@ -120,8 +136,8 @@ function void s8list_print(s8list *list) {
   }
 }
 
-function s8list s8list_slice(s8list *list, ptrdiff_t start, ptrdiff_t end) {
-  s8list out = s8list_init();
+function s8list *s8list_slice(s8list *list, ptrdiff_t start, ptrdiff_t end) {
+  s8list *out = s8list_init();
   ptrdiff_t idx = 0;
   s8node *curr = list->head;
   while (idx < start && curr != NULL) {
@@ -130,7 +146,7 @@ function s8list s8list_slice(s8list *list, ptrdiff_t start, ptrdiff_t end) {
   }
   while (idx < end && curr != NULL) {
     idx++;
-    s8list_append(&out, curr->val);
+    s8list_append(out, &curr->val);
     curr = curr->next;
   }
   return out;
@@ -143,6 +159,8 @@ function s8 s8list_to_s8(s8list *list) {
   s8node *curr = list->head;
   while (curr != NULL) {
     for (ptrdiff_t i = 0; i < curr->val.len; i++) {
+      // printf("%c\n", curr->val.data[i]);
+      printf("%s\n%td\n", buffer, pos);
       buffer[pos++] = curr->val.data[i];
     }
     curr = curr->next;

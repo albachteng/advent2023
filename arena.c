@@ -2,6 +2,7 @@
 #include "base.h"
 #include <assert.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #define ARENA_SIZE 1024
@@ -16,7 +17,9 @@ arena init_arena() {
 void *alloc(arena *a, ptrdiff_t length, ptrdiff_t align, ptrdiff_t count) {
   ptrdiff_t avail = a->end - a->beg;
   ptrdiff_t padding = -(size_t)a->beg & (align - 1);
+  // if (1 > (8 - 0) / 24)
   if (count > (avail - padding) / length) {
+    printf("%td %td %td %td\n", avail, padding, count, length);
     assert(0); // TODO
   }
   ptrdiff_t total = length * count;
