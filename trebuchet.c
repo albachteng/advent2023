@@ -26,8 +26,7 @@ int main() {
       if (line.str.data[end]) {
         // char was num
         if (char_is_num(line.str.data[end])) {
-          printf("shouldn't be hitting this\n");
-          // reset start
+          // new substring, reset start to next non-num char
           start = end + 1;
           if (!first_digit.ok) {
             first_digit = (char_parsed){line.str.data[end], 1};
@@ -36,21 +35,19 @@ int main() {
           }
         } else {
           // char was not num
+          // no need to check substrings larger than 5 characters
+          while (start - end > 5)
+            start++;
           // get substr from start to end
           for (ptrdiff_t i = start; i < end; i++) {
             char *substr = get_substr(line.str.data, i, end);
-            printf("line = %s\n", line.str.data);
-            printf("substr = %s\n", substr);
             // check against lookup table
             char_parsed strch = str_to_byte(substr);
-            printf("strch = %c\n", strch.data);
-            // if we find a word, add its number to first or second digit as
-            // appropriate then reset start = end to get ready for next word
+            // if we found a valid word
             if (strch.ok) {
-              printf("strch was ok\n");
               // if we found a word, set start to after the word we found
-              start = i + strlen(substr) - 1; // NTS might be off by 1
-              // also set i, no need to check inside a word
+              start = i + strlen(substr) - 1;
+              // also set i, no need to check inside a word we already found
               i = start;
               if (!first_digit.ok) {
                 first_digit.data = strch.data;
@@ -59,15 +56,12 @@ int main() {
                 second_digit.data = strch.data;
                 second_digit.ok = 1;
               }
-              // start = end + 1; NTS not sure if this is still necessary
             }
           }
-          printf("start = %td end = %td\n", start, end);
         }
       }
     }
     int to_add = make_two_digit(first_digit, second_digit);
-    printf("to add: %d\n", to_add);
     total += to_add;
     line = next_line(reader);
   }
@@ -102,22 +96,18 @@ function char *get_substr(char *str, ptrdiff_t beg, ptrdiff_t end) {
 int make_two_digit(char_parsed first, char_parsed second) {
   int tens;
   int ones;
-  printf("first = %c, second = %c\n", first.data, second.data);
   tens = first.data - '0';
   if (second.ok && char_is_num(second.data)) {
     ones = second.data - '0';
   } else {
     ones = tens;
   }
-  printf("tens = %d, ones = %d\n", tens, ones);
   return (tens * 10) + ones;
 }
 
 function char_parsed str_to_byte(char *str) {
-  printf("str = %s\n", str);
   for (ptrdiff_t i = 0; i < 10; i++) {
     if (!strcmp(str, lookup[i])) {
-      printf("strcmp successful with %s\n", lookup[i]);
       char ch = i + '0';
       return (char_parsed){.data = ch, .ok = 1};
     }
