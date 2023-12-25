@@ -1,6 +1,9 @@
 #include "io.c"
+#include <math.h>
 #include <stddef.h>
+#include <stdlib.h>
 
+function int get_multi_digit(char *line, ptrdiff_t start, ptrdiff_t end);
 function b32 char_is_num(char ch) { return (ch >= '0' && ch <= '9') ? 1 : 0; }
 
 function b32 is_symbol(char ch) {
@@ -56,10 +59,30 @@ int main(void) {
       printf("%td, ", curr_num_arr[j]);
     }
     printf(") \n");
+    // loop through symbol pos and check for adjacencies
     printf("symbols: ");
-    for (ptrdiff_t k = 0; k < curr_symb_count; k++) {
-      printf("%td ", curr_symb_arr[k]);
+    for (ptrdiff_t curr_symb_idx = 0; curr_symb_idx < curr_symb_count;
+         curr_symb_idx++) {
+      printf("%td ", curr_symb_arr[curr_symb_idx]);
+      // check for current line adjacencies
+      for (ptrdiff_t curr_num_idx = 0; curr_num_idx < curr_num_count;
+           curr_num_idx++) {
+        if (curr_symb_arr[curr_symb_idx] - 1 == curr_num_arr[curr_num_idx]) {
+          // add to total and remove from curr_num_arr
+          total += get_multi_digit(curr_line.str.data, curr_symb_idx - 2,
+                                   curr_symb_idx - 1);
+        }
+        if (curr_symb_arr[curr_symb_idx] + 1 == curr_num_arr[curr_num_idx]) {
+          total += get_multi_digit(curr_line.str.data, curr_symb_idx + 1,
+                                   curr_symb_idx + 2);
+        }
+        if (line_number != 1) {
+          // check for prior line adjacencies
+        }
+        // loop through prior symbols and check against curr for adjacencies
+      }
     }
+    printf("\ntotal = %d", total);
     printf("\n");
     printf("\n prev line: %s\n", prev_line.str.data);
     prev_line = curr_line;
@@ -87,4 +110,21 @@ int main(void) {
   // if in a number, flip to off and record ending position of number
   free(curr_num_arr);
   free(curr_symb_arr);
+}
+
+function int get_multi_digit(char *line, ptrdiff_t start, ptrdiff_t end) {
+  int total = 0;
+  int power = end - start;
+  if (power < 0) { // something has gone wrong
+    printf("power was less than zero");
+    exit(EXIT_FAILURE);
+  }
+  for (ptrdiff_t i = start; i < end; i++) {
+    if (!char_is_num(line[i])) {
+      printf("char was not num");
+      exit(EXIT_FAILURE);
+    }
+    total += (int)(pow(10, power) * atoi(&line[i]));
+  }
+  return total;
 }
