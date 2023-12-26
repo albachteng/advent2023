@@ -183,7 +183,7 @@ function void s8list_free(s8list *list) {
 //   s8 out = s8slice(str, 5, 9);
 //   s8print(out);
 // }
-//
+
 // returns the character from the string at poition pos
 function char_parsed s8at(s8 src, int pos) {
   char_parsed out = (char_parsed){.data = ' ', .ok = 0};
