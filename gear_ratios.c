@@ -17,91 +17,160 @@ function void add_pos(ptrdiff_t *positions, ptrdiff_t pos, ptrdiff_t count) {
 
 int main() {
   int total = 0;
-  int line_number = 1;
+  int line_number = 2;
   line_reader *reader = new_line_reader("input3.txt", MAX_LINE_LENGTH);
-  s8_parsed prev_line = next_line(reader);
+  // s8_parsed prev_line = next_line(reader);
   s8_parsed curr_line = next_line(reader);
+  s8 *prev_line;
+  prev_line->data = malloc(sizeof(char) * curr_line.str.len);
+  strncpy(prev_line->data, curr_line.str.data, curr_line.str.len);
+  prev_line->len = curr_line.str.len;
+  curr_line = next_line(reader);
   ptrdiff_t prev_symb_count = 0;
   ptrdiff_t curr_symb_count = 0;
   ptrdiff_t *prev_symb_arr = malloc(sizeof(ptrdiff_t) * MAX_LINE_LENGTH);
   ptrdiff_t *curr_symb_arr = malloc(sizeof(ptrdiff_t) * MAX_LINE_LENGTH);
 
-  while (curr_line.ok) {
-    printf("%s\n", curr_line.str.data);
+  while (line_number <= 141) {
+    b32 same = strcmp(prev_line->data, curr_line.str.data);
+    printf("same? %d", same);
+    printf("line number: %d\n", line_number);
+    printf("prev line = %s\n", prev_line->data);
+    printf("curr line = %s\n", curr_line.str.data);
     for (ptrdiff_t i = 0; i < curr_line.str.len; i++) {
       if (char_is_symbol(curr_line.str.data[i])) {
+        // printf("%c @ %td is symbol\n", curr_line.str.data[i], i);
         add_pos(curr_symb_arr, i, curr_symb_count);
         curr_symb_count++;
+        // printf("curr_symb_arr = ");
+        // for (ptrdiff_t i = 0; i < curr_symb_count; i++) {
+        //   printf("%td ", curr_symb_arr[i]);
+        // }
+        // printf("\n");
+        // printf("curr_symb_count = %td\n", curr_symb_count);
       }
     }
     // note that first line always has zero symbols
     // prev_line symbols -> curr_line
-    printf("symbols: ");
+    printf("prev line symbols v. curr line: \n");
     for (ptrdiff_t prev_symb_idx = 0; prev_symb_idx < prev_symb_count;
          prev_symb_idx++) {
-      printf("%td ", prev_symb_arr[prev_symb_idx]);
+      printf("prev symb indx: prev symb arr @ prev symb indx\n");
+      printf("#%td: %td ", prev_symb_idx, prev_symb_arr[prev_symb_idx]);
       ptrdiff_t curr_idx = prev_symb_arr[prev_symb_idx];
-      if (char_is_num(prev_line.str.data[curr_idx - 1])) {
+      printf("\n");
+      if (char_is_num(curr_line.str.data[curr_idx - 1])) {
         // step back until not a number - no need to do this for the next two
-        ptrdiff_t temp_idx = step_back(prev_line.str.data, curr_idx - 1);
+        printf("found %c, stepping back\n", curr_line.str.data[curr_idx - 1]);
+        ptrdiff_t temp_idx = step_back(curr_line.str.data, curr_idx - 1);
+        printf("temp_idx = %td\n", temp_idx);
         // add number to total
-        total += add_to_total(prev_line.str.data, temp_idx);
+        int to_add = add_to_total(curr_line.str.data, temp_idx);
+        total += to_add;
+        printf("adding %d to total, total is now %d\n", to_add, total);
         // zero out the number
-        zero_out(prev_line.str.data, temp_idx);
+        printf("zeroing out\n");
+        zero_out(curr_line.str.data, temp_idx);
+        printf("after zeroing: %s\n", curr_line.str.data);
       }
-      if (char_is_num(prev_line.str.data[curr_idx])) {
-        ptrdiff_t temp_idx = step_back(prev_line.str.data, curr_idx);
-        total += add_to_total(prev_line.str.data, temp_idx);
-        zero_out(prev_line.str.data, temp_idx);
+      if (char_is_num(curr_line.str.data[curr_idx])) {
+        printf("found %c\n", curr_line.str.data[curr_idx]);
+        // ptrdiff_t temp_idx = step_back(curr_line.str.data, curr_idx);
+        // NTS - no reason to step back here?
+        int to_add = add_to_total(curr_line.str.data, curr_idx);
+        total += to_add;
+        printf("adding %d to total, total is now %d\n", to_add, total);
+        printf("zeroing out\n");
+        zero_out(curr_line.str.data, curr_idx);
+        printf("after zeroing: %s\n", curr_line.str.data);
       }
-      if (char_is_num(prev_line.str.data[curr_idx + 1])) {
-        total += add_to_total(prev_line.str.data, curr_idx + 1);
-        zero_out(prev_line.str.data, curr_idx + 1);
+      if (char_is_num(curr_line.str.data[curr_idx + 1])) {
+        printf("found %c\n", curr_line.str.data[curr_idx + 1]);
+        int to_add = add_to_total(curr_line.str.data, curr_idx + 1);
+        total += to_add;
+        printf("adding %d to total, total is now %d\n", to_add, total);
+        printf("zeroing out\n");
+        zero_out(curr_line.str.data, curr_idx + 1);
+        printf("after zeroing: %s\n", curr_line.str.data);
       }
     }
     // curr_line symbols -> prev_line
+    printf("curr line symbols v prev line\n");
     for (ptrdiff_t curr_symb_idx = 0; curr_symb_idx < curr_symb_count;
          curr_symb_idx++) {
+      printf("curr symb indx: prev symb arr @ curr symb indx\n");
+      printf("#%td: %td ", curr_symb_idx, prev_symb_arr[curr_symb_idx]);
       ptrdiff_t curr_idx = curr_symb_arr[curr_symb_idx];
-      if (char_is_num(prev_line.str.data[curr_idx - 1])) {
-        printf("1");
-        ptrdiff_t temp_idx = step_back(prev_line.str.data, curr_idx - 1);
-        total += add_to_total(prev_line.str.data, temp_idx);
-        zero_out(prev_line.str.data, temp_idx);
+      if (char_is_num(prev_line->data[curr_idx - 1])) {
+        printf("found %c @ %td\n", prev_line->data[curr_idx - 1], curr_idx - 1);
+        printf("stepping back\n");
+        ptrdiff_t temp_idx = step_back(prev_line->data, curr_idx - 1);
+        printf("temp indx = %td\n", temp_idx);
+        int to_add = add_to_total(prev_line->data, temp_idx);
+        total += to_add;
+        printf("adding %d to total, total is now %d\n", to_add, total);
+        printf("zeroing out\n");
+        zero_out(prev_line->data, temp_idx); // NTS: need to be a pointer???
+        printf("after zeroing: %s\n", prev_line->data);
       }
-      if (char_is_num(prev_line.str.data[curr_idx])) {
-        printf("2");
-        total += add_to_total(prev_line.str.data, curr_idx);
-        zero_out(prev_line.str.data, curr_idx);
+      if (char_is_num(prev_line->data[curr_idx])) {
+        printf("found %c @ %td\n", prev_line->data[curr_idx], curr_idx);
+        int to_add = add_to_total(prev_line->data, curr_idx);
+        total += to_add;
+        printf("adding %d to total, total is now %d\n", to_add, total);
+        printf("zeroing out\n");
+        zero_out(prev_line->data, curr_idx);
+        printf("after zeroing: %s\n", prev_line->data);
       }
-      if (char_is_num(prev_line.str.data[curr_idx + 1])) {
-        printf("3");
-        total += add_to_total(prev_line.str.data, curr_idx + 1);
-        zero_out(prev_line.str.data, curr_idx);
+      if (char_is_num(prev_line->data[curr_idx + 1])) {
+        printf("found %c @ %td\n", prev_line->data[curr_idx + 1], curr_idx + 1);
+        int to_add = add_to_total(prev_line->data, curr_idx + 1);
+        total += to_add;
+        printf("adding %d to total, total is now %d\n", to_add, total);
+        printf("zeroing out\n");
+        zero_out(prev_line->data, curr_idx + 1);
+        printf("after zeroing: %s\n", prev_line->data);
       }
       // curr_line symbols -> curr_line
+      printf("curr line symb v. curr line\n");
       if (char_is_num(curr_line.str.data[curr_idx - 1])) {
-        printf("4");
+        printf("found %c @ %td\n", curr_line.str.data[curr_idx - 1],
+               curr_idx - 1);
         ptrdiff_t temp_idx = step_back(curr_line.str.data, curr_idx - 1);
-        total += add_to_total(curr_line.str.data, temp_idx);
+        printf("temp idx = %td \n", temp_idx);
+        int to_add = add_to_total(curr_line.str.data, temp_idx);
+        total += to_add;
+        printf("adding %d to total, total is now %d\n", to_add, total);
+        printf("zeroing out\n");
         zero_out(curr_line.str.data, temp_idx);
+        printf("after zeroing: %s\n", curr_line.str.data);
       }
       if (char_is_num(curr_line.str.data[curr_idx + 1])) {
-        printf("5");
-        ptrdiff_t temp_idx = step_back(curr_line.str.data, curr_idx + 1);
-        printf("\ntemp inx: %td\n", temp_idx);
-        printf("char = %c", curr_line.str.data[temp_idx]);
-        total += add_to_total(curr_line.str.data, temp_idx);
-        zero_out(curr_line.str.data, temp_idx);
+        printf("found %c @ %td\n", curr_line.str.data[curr_idx + 1],
+               curr_idx + 1);
+        // ptrdiff_t temp_idx = step_back(curr_line.str.data, curr_idx + 1);
+        // NTS no reason to step back?
+        printf("char = %c", curr_line.str.data[curr_idx + 1]);
+        int to_add = add_to_total(curr_line.str.data, curr_idx + 1);
+        total += to_add;
+        printf("adding %d to total, total is now %d\n", to_add, total);
+        printf("zeroing out\n");
+        zero_out(curr_line.str.data, curr_idx + 1);
+        printf("after zeroing: %s\n", curr_line.str.data);
       }
     }
+    printf("out of inner loop\n");
     printf("\ntotal = %d", total);
     printf("\n");
-    printf("\n prev line: %s\n", prev_line.str.data);
-    prev_line = curr_line;
+    printf("\n prev line: %s\n", prev_line->data);
+    strncpy(prev_line->data, curr_line.str.data, curr_line.str.len);
     curr_line = next_line(reader);
+    prev_symb_count = curr_symb_count;
+    prev_symb_arr = curr_symb_arr;
     curr_symb_count = 0;
+    line_number++;
   }
+  printf("out of outer loop\n");
   printf("\ntotal = %d", total);
   free(curr_symb_arr);
 }
@@ -114,26 +183,7 @@ function ptrdiff_t step_back(char *line, ptrdiff_t curr_idx) {
 }
 
 function int add_to_total(char *line, ptrdiff_t start) {
-  int total = 0;
-  int end = start;
-  while (char_is_num(line[end + 1])) {
-    end++;
-  }
-  int power = end - start;
-  if (power < 0) { // something has gone wrong
-    printf("power was less than zero");
-    exit(EXIT_FAILURE);
-  }
-  for (ptrdiff_t i = start; i < end; i++) {
-    if (!char_is_num(line[i])) {
-      printf("char was not num - %c /t index %td\n", line[i],
-             start); // something has gone wrong
-      exit(EXIT_FAILURE);
-    }
-    total += (int)(pow(10, power) * atoi(&line[i]));
-  }
-  printf("total was: %d\n", total);
-  return total;
+  return atoi(&line[start]);
 }
 
 function void zero_out(char *line, ptrdiff_t start) {
@@ -141,7 +191,7 @@ function void zero_out(char *line, ptrdiff_t start) {
   while (char_is_num(line[end + 1])) {
     end++;
   }
-  for (ptrdiff_t i = start; i < end; i++) {
+  for (ptrdiff_t i = start; i <= end; i++) {
     line[i] = '0';
   }
 }
