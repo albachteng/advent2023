@@ -1,13 +1,5 @@
-#include "io.h"
-#include <stddef.h>
-#include <stdlib.h>
-
+#include "set.h"
 #define MAX_SET_SIZE 100
-
-typedef struct {
-  ptrdiff_t size;
-  int *elements;
-} Set;
 
 function void set_init(Set *s) {
   s->elements = malloc(sizeof(int) * MAX_SET_SIZE);
